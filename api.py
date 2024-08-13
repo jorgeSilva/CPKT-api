@@ -1,6 +1,8 @@
 from selenium import webdriver as opselenium
 from selenium.webdriver.common.by import By
+from dotenv import load_dotenv
 
+import os
 import pyautogui as waitTime
 from flask import  Flask, jsonify
 import pandas as pd
@@ -95,6 +97,9 @@ def componentsKabum(item, param):
 
     return jsonify(data_item_search)
 
+load_dotenv()
+
+port = int(os.getenv('PORT'))
 
 # rodar a api
-app.run(host='0.0.0.0')
+app.run(host='0.0.0.0', port=port)
