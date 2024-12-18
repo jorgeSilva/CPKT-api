@@ -1,4 +1,5 @@
 from selenium import webdriver as opselenium
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from dotenv import load_dotenv
 
@@ -16,25 +17,23 @@ def home():
 @app.route('/components-kabum/<item>/', defaults={'param': None})
 @app.route('/components-kabum/<item>/<param>')
 def componentsKabum(item, param):
-    browser = opselenium.Chrome()
-    browser.maximize_window()
 
-    # search_item_name_cpu_amd = "processadores/processador-amd"
-    # search_item_name_cpu_intel = "processadores/processador-intel"
-    # search_item_name = "placas-mae/placa-mae-intel"
-    # search_item_name = "placas-mae/placa-mae-amd"
-    # search_item_name_memoria = "memoria-ram/ddr-4"
-    # search_item_name = "placa-de-video-vga/placa-de-video-amd"
-    # search_item_name = "placa-de-video-vga/placa-de-video-nvidia"
-    # search_item_name_fontes = "fontes"
-    # search_item_name_ssd = "ssd-2-5"
-    # search_item_name_hd = "disco-rigido-hd"
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Ativa o modo headless (sem interface gráfica)
+    chrome_options.add_argument("--start-maximized")  # Maximizar a janela (opcional, pode ser omitido)
+    chrome_options.add_argument("--disable-gpu")  # Desabilita o uso de GPU (opcional, ajuda em alguns casos)
+    chrome_options.add_argument("--no-sandbox")  # Desabilita o sandbox (opcional, ajuda em containers)
+
+    # Inicializar o ChromeDriver com as opções
+    browser = opselenium.Chrome(options=chrome_options)
+    browser.maximize_window()
 
     if type(param) is not str:
         browser.get(f"https://www.kabum.com.br/hardware/{item}")
     else:
         browser.get(f"https://www.kabum.com.br/hardware/{item}/{param}")
 
+    browser.execute_script("document.body.style.zoom='80%'")
     waitTime.sleep(1)
 
     browser.find_element(By.XPATH, '//*[@id="Filter"]/label/select').click()
@@ -48,15 +47,19 @@ def componentsKabum(item, param):
 
     data_item_search = []
 
+    waitTime.sleep(1)
+
     n_max_pages = 1
     i = 1
 
     if len(content_pages) > 1:
         n_max_pages = content_pages[-1]
+        print(n_max_pages)
 
     while i <= int(n_max_pages):
 
-        main_card = browser.find_element(By.TAG_NAME, 'main')
+        main_card = browser.find_element(By.CLASS_NAME, 'ebKsig')
+        print(main_card)
         card = main_card.find_elements(By.CLASS_NAME, 'productCard')
 
         print(f"{i}/{n_max_pages}")
@@ -83,7 +86,7 @@ def componentsKabum(item, param):
             i += 1
             browser.execute_script("""
                     var scrollHeight = document.body.scrollHeight;
-                    var scrollPosition = scrollHeight * 0.77;
+                    var scrollPosition = scrollHeight * 0.9;
                     window.scrollTo(0, scrollPosition);
                 """)
             waitTime.sleep(1)
@@ -103,3 +106,14 @@ port = int(os.getenv('PORT'))
 
 # rodar a api
 app.run(host='0.0.0.0', port=port)
+
+# search_item_name_cpu_amd = "processadores/processador-amd"
+# search_item_name_cpu_intel = "processadores/processador-intel"
+# search_item_name = "placas-mae/placa-mae-intel"
+# search_item_name = "placas-mae/placa-mae-amd"
+# search_item_name_memoria = "memoria-ram/ddr-4"
+# search_item_name = "placa-de-video-vga/placa-de-video-amd"
+# search_item_name = "placa-de-video-vga/placa-de-video-nvidia"
+# search_item_name_fontes = "fontes"
+# search_item_name_ssd = "ssd-2-5"
+# search_item_name_hd = "disco-rigido-hd"
